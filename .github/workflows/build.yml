@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Android TV APK
 
 on:
   push:
@@ -7,182 +7,83 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
-      - name: Create project
+      - name: Write settings.gradle
+        run: |
+          echo 'cGx1Z2luTWFuYWdlbWVudCB7CiAgICByZXBvc2l0b3JpZXMgewogICAgICAgIGdvb2dsZSgpCiAgICAgICAgbWF2ZW5DZW50cmFsKCkKICAgICAgICBncmFkbGVQbHVnaW5Qb3J0YWwoKQogICAgfQp9CmRlcGVuZGVuY3lSZXNvbHV0aW9uTWFuYWdlbWVudCB7CiAgICByZXBvc2l0b3JpZXNNb2RlLnNldChSZXBvc2l0b3JpZXNNb2RlLkZBSUxfT05fUFJPSkVDVF9SRVBPUykKICAgIHJlcG9zaXRvcmllcyB7CiAgICAgICAgZ29vZ2xlKCkKICAgICAgICBtYXZlbkNlbnRyYWwoKQogICAgfQp9CnJvb3RQcm9qZWN0Lm5hbWUgPSAiQmxhY2tTY3JlZW5UViIKaW5jbHVkZSAnOmFwcCcK' | base64 -d > settings.gradle
+
+      - name: Write build.gradle
+        run: |
+          echo 'cGx1Z2lucyB7CiAgICBpZCAnY29tLmFuZHJvaWQuYXBwbGljYXRpb24nIHZlcnNpb24gJzguMS40JyBhcHBseSBmYWxzZQp9Cg==' | base64 -d > build.gradle
+
+      - name: Write gradle/wrapper/gradle-wrapper.properties
+        run: |
+          mkdir -p gradle/wrapper
+          echo 'ZGlzdHJpYnV0aW9uQmFzZT1HUkFETEVfVVNFUl9IT01FCmRpc3RyaWJ1dGlvblBhdGg9d3JhcHBlci9kaXN0cwpkaXN0cmlidXRpb25Vcmw9aHR0cHNcOi8vc2VydmljZXMuZ3JhZGxlLm9yZy9kaXN0cmlidXRpb25zL2dyYWRsZS04LjQtYmluLnppcAp6aXBTdG9yZUJhc2U9R1JBRExFX1VTRVJfSE9NRQp6aXBTdG9yZVBhdGg9d3JhcHBlci9kaXN0cwo=' | base64 -d > gradle/wrapper/gradle-wrapper.properties
+
+      - name: Write app/build.gradle
+        run: |
+          mkdir -p app
+          echo 'cGx1Z2lucyB7CiAgICBpZCAnY29tLmFuZHJvaWQuYXBwbGljYXRpb24nCn0KCmFuZHJvaWQgewogICAgbmFtZXNwYWNlICdjb20uYmxhY2tzY3JlZW4udHYnCiAgICBjb21waWxlU2RrIDM0CgogICAgZGVmYXVsdENvbmZpZyB7CiAgICAgICAgYXBwbGljYXRpb25JZCAiY29tLmJsYWNrc2NyZWVuLnR2IgogICAgICAgIG1pblNkayAyMQogICAgICAgIHRhcmdldFNkayAzNAogICAgICAgIHZlcnNpb25Db2RlIDEKICAgICAgICB2ZXJzaW9uTmFtZSAiMS4wIgogICAgfQoKICAgIGJ1aWxkVHlwZXMgewogICAgICAgIGRlYnVnIHsKICAgICAgICAgICAgZGVidWdnYWJsZSB0cnVlCiAgICAgICAgfQogICAgfQoKICAgIGNvbXBpbGVPcHRpb25zIHsKICAgICAgICBzb3VyY2VDb21wYXRpYmlsaXR5IEphdmFWZXJzaW9uLlZFUlNJT05fMV84CiAgICAgICAgdGFyZ2V0Q29tcGF0aWJpbGl0eSBKYXZhVmVyc2lvbi5WRVJTSU9OXzFfOAogICAgfQp9Cg==' | base64 -d > app/build.gradle
+
+      - name: Write app/src/main/AndroidManifest.xml
+        run: |
+          mkdir -p app/src/main
+          echo 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPG1hbmlmZXN0IHhtbG5zOmFuZHJvaWQ9Imh0dHA6Ly9zY2hlbWFzLmFuZHJvaWQuY29tL2Fway9yZXMvYW5kcm9pZCIKICAgIHBhY2thZ2U9ImNvbS5ibGFja3NjcmVlbi50diI+CgogICAgPHVzZXMtZmVhdHVyZQogICAgICAgIGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5zb2Z0d2FyZS5sZWFuYmFjayIKICAgICAgICBhbmRyb2lkOnJlcXVpcmVkPSJmYWxzZSIgLz4KICAgIDx1c2VzLWZlYXR1cmUKICAgICAgICBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaGFyZHdhcmUudG91Y2hzY3JlZW4iCiAgICAgICAgYW5kcm9pZDpyZXF1aXJlZD0iZmFsc2UiIC8+CgogICAgPGFwcGxpY2F0aW9uCiAgICAgICAgYW5kcm9pZDphbGxvd0JhY2t1cD0iZmFsc2UiCiAgICAgICAgYW5kcm9pZDpiYW5uZXI9IkBkcmF3YWJsZS90dl9iYW5uZXIiCiAgICAgICAgYW5kcm9pZDppY29uPSJAbWlwbWFwL2ljX2xhdW5jaGVyIgogICAgICAgIGFuZHJvaWQ6bGFiZWw9IkJsYWNrIFNjcmVlbiIKICAgICAgICBhbmRyb2lkOnRoZW1lPSJAYW5kcm9pZDpzdHlsZS9UaGVtZS5CbGFjay5Ob1RpdGxlQmFyLkZ1bGxzY3JlZW4iPgoKICAgICAgICA8YWN0aXZpdHkKICAgICAgICAgICAgYW5kcm9pZDpuYW1lPSIuTWFpbkFjdGl2aXR5IgogICAgICAgICAgICBhbmRyb2lkOmNvbmZpZ0NoYW5nZXM9ImtleWJvYXJkfGtleWJvYXJkSGlkZGVufG5hdmlnYXRpb258b3JpZW50YXRpb258c2NyZWVuU2l6ZSIKICAgICAgICAgICAgYW5kcm9pZDpleHBvcnRlZD0idHJ1ZSIKICAgICAgICAgICAgYW5kcm9pZDpsYXVuY2hNb2RlPSJzaW5nbGVUYXNrIgogICAgICAgICAgICBhbmRyb2lkOnNjcmVlbk9yaWVudGF0aW9uPSJsYW5kc2NhcGUiPgogICAgICAgICAgICA8aW50ZW50LWZpbHRlcj4KICAgICAgICAgICAgICAgIDxhY3Rpb24gYW5kcm9pZDpuYW1lPSJhbmRyb2lkLmludGVudC5hY3Rpb24uTUFJTiIgLz4KICAgICAgICAgICAgICAgIDxjYXRlZ29yeSBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LmNhdGVnb3J5LkxBVU5DSEVSIiAvPgogICAgICAgICAgICA8L2ludGVudC1maWx0ZXI+CiAgICAgICAgICAgIDxpbnRlbnQtZmlsdGVyPgogICAgICAgICAgICAgICAgPGFjdGlvbiBhbmRyb2lkOm5hbWU9ImFuZHJvaWQuaW50ZW50LmFjdGlvbi5NQUlOIiAvPgogICAgICAgICAgICAgICAgPGNhdGVnb3J5IGFuZHJvaWQ6bmFtZT0iYW5kcm9pZC5pbnRlbnQuY2F0ZWdvcnkuTEVBTkJBQ0tfTEFVTkNIRVIiIC8+CiAgICAgICAgICAgIDwvaW50ZW50LWZpbHRlcj4KICAgICAgICA8L2FjdGl2aXR5PgoKICAgIDwvYXBwbGljYXRpb24+CjwvbWFuaWZlc3Q+Cg==' | base64 -d > app/src/main/AndroidManifest.xml
+
+      - name: Write app/src/main/java/com/blackscreen/tv/MainActivity.java
         run: |
           mkdir -p app/src/main/java/com/blackscreen/tv
+          echo 'cGFja2FnZSBjb20uYmxhY2tzY3JlZW4udHY7CgppbXBvcnQgYW5kcm9pZC5hcHAuQWN0aXZpdHk7CmltcG9ydCBhbmRyb2lkLmdyYXBoaWNzLkNvbG9yOwppbXBvcnQgYW5kcm9pZC5vcy5CdW5kbGU7CmltcG9ydCBhbmRyb2lkLnZpZXcuS2V5RXZlbnQ7CmltcG9ydCBhbmRyb2lkLnZpZXcuVmlldzsKaW1wb3J0IGFuZHJvaWQudmlldy5XaW5kb3c7CmltcG9ydCBhbmRyb2lkLnZpZXcuV2luZG93TWFuYWdlcjsKaW1wb3J0IGFuZHJvaWQud2lkZ2V0LkZyYW1lTGF5b3V0OwoKcHVibGljIGNsYXNzIE1haW5BY3Rpdml0eSBleHRlbmRzIEFjdGl2aXR5IHsKCiAgICBAT3ZlcnJpZGUKICAgIHByb3RlY3RlZCB2b2lkIG9uQ3JlYXRlKEJ1bmRsZSBzYXZlZEluc3RhbmNlU3RhdGUpIHsKICAgICAgICBzdXBlci5vbkNyZWF0ZShzYXZlZEluc3RhbmNlU3RhdGUpOwoKICAgICAgICByZXF1ZXN0V2luZG93RmVhdHVyZShXaW5kb3cuRkVBVFVSRV9OT19USVRMRSk7CgogICAgICAgIGdldFdpbmRvdygpLnNldEZsYWdzKAogICAgICAgICAgICBXaW5kb3dNYW5hZ2VyLkxheW91dFBhcmFtcy5GTEFHX0ZVTExTQ1JFRU4sCiAgICAgICAgICAgIFdpbmRvd01hbmFnZXIuTGF5b3V0UGFyYW1zLkZMQUdfRlVMTFNDUkVFTgogICAgICAgICk7CiAgICAgICAgZ2V0V2luZG93KCkuYWRkRmxhZ3MoV2luZG93TWFuYWdlci5MYXlvdXRQYXJhbXMuRkxBR19LRUVQX1NDUkVFTl9PTik7CgogICAgICAgIEZyYW1lTGF5b3V0IGxheW91dCA9IG5ldyBGcmFtZUxheW91dCh0aGlzKTsKICAgICAgICBsYXlvdXQuc2V0QmFja2dyb3VuZENvbG9yKENvbG9yLkJMQUNLKTsKICAgICAgICBzZXRDb250ZW50VmlldyhsYXlvdXQpOwoKICAgICAgICBoaWRlU3lzdGVtVUkoKTsKICAgIH0KCiAgICBwcml2YXRlIHZvaWQgaGlkZVN5c3RlbVVJKCkgewogICAgICAgIGdldFdpbmRvdygpLmdldERlY29yVmlldygpLnNldFN5c3RlbVVpVmlzaWJpbGl0eSgKICAgICAgICAgICAgVmlldy5TWVNURU1fVUlfRkxBR19JTU1FUlNJVkVfU1RJQ0tZCiAgICAgICAgICAgIHwgVmlldy5TWVNURU1fVUlfRkxBR19MQVlPVVRfU1RBQkxFCiAgICAgICAgICAgIHwgVmlldy5TWVNURU1fVUlfRkxBR19MQVlPVVRfSElERV9OQVZJR0FUSU9OCiAgICAgICAgICAgIHwgVmlldy5TWVNURU1fVUlfRkxBR19MQVlPVVRfRlVMTFNDUkVFTgogICAgICAgICAgICB8IFZpZXcuU1lTVEVNX1VJX0ZMQUdfSElERV9OQVZJR0FUSU9OCiAgICAgICAgICAgIHwgVmlldy5TWVNURU1fVUlfRkxBR19GVUxMU0NSRUVOCiAgICAgICAgKTsKICAgIH0KCiAgICBAT3ZlcnJpZGUKICAgIHB1YmxpYyB2b2lkIG9uV2luZG93Rm9jdXNDaGFuZ2VkKGJvb2xlYW4gaGFzRm9jdXMpIHsKICAgICAgICBzdXBlci5vbldpbmRvd0ZvY3VzQ2hhbmdlZChoYXNGb2N1cyk7CiAgICAgICAgaWYgKGhhc0ZvY3VzKSB7CiAgICAgICAgICAgIGhpZGVTeXN0ZW1VSSgpOwogICAgICAgIH0KICAgIH0KCiAgICBAT3ZlcnJpZGUKICAgIHB1YmxpYyBib29sZWFuIG9uS2V5RG93bihpbnQga2V5Q29kZSwgS2V5RXZlbnQgZXZlbnQpIHsKICAgICAgICBmaW5pc2goKTsKICAgICAgICByZXR1cm4gdHJ1ZTsKICAgIH0KCiAgICBAT3ZlcnJpZGUKICAgIHB1YmxpYyB2b2lkIG9uQmFja1ByZXNzZWQoKSB7CiAgICAgICAgZmluaXNoKCk7CiAgICB9Cn0K' | base64 -d > app/src/main/java/com/blackscreen/tv/MainActivity.java
+
+      - name: Write app/src/main/res/values/strings.xml
+        run: |
           mkdir -p app/src/main/res/values
+          echo 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHJlc291cmNlcz4KICAgIDxzdHJpbmcgbmFtZT0iYXBwX25hbWUiPkJsYWNrIFNjcmVlbjwvc3RyaW5nPgo8L3Jlc291cmNlcz4K' | base64 -d > app/src/main/res/values/strings.xml
+
+      - name: Write app/src/main/res/drawable-xhdpi/tv_banner.png
+        run: |
+          mkdir -p app/src/main/res/drawable-xhdpi
+          echo 'iVBORw0KGgoAAAANSUhEUgAAAUAAAAC0CAIAAABqhmJGAAAAvklEQVR42u3BMQEAAADCoPVPbQwfoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4GOj0gABnYaj9QAAAABJRU5ErkJggg==' | base64 -d > app/src/main/res/drawable-xhdpi/tv_banner.png
+
+      - name: Write app/src/main/res/mipmap-hdpi/ic_launcher.png
+        run: |
           mkdir -p app/src/main/res/mipmap-hdpi
+          echo 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAHUlEQVR42u3BAQEAAACCIP+vbkhAAQAAAAAAwK8BGzAAAVZsJ8oAAAAASUVORK5CYII=' | base64 -d > app/src/main/res/mipmap-hdpi/ic_launcher.png
 
-          cat > app/src/main/java/com/blackscreen/tv/MainActivity.java << 'JAVA'
-package com.blackscreen.tv;
-import android.app.Activity;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
-
-public class MainActivity extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        );
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        FrameLayout layout = new FrameLayout(this);
-        layout.setBackgroundColor(Color.BLACK);
-        setContentView(layout);
-        hideUI();
-    }
-
-    private void hideUI() {
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN
-        );
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) hideUI();
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        finish();
-        return true;
-    }
-
-    @Override
-    public void onBackPressed() {
-        finish();
-    }
-}
-JAVA
-
-          cat > app/src/main/AndroidManifest.xml << 'XML'
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.blackscreen.tv">
-    <application
-        android:allowBackup="false"
-        android:label="Black Screen"
-        android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:screenOrientation="landscape"
-            android:launchMode="singleTask">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
-XML
-
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Black Screen</string></resources>' \
-            > app/src/main/res/values/strings.xml
-
-          # Simple black icon PNG 48x48
-          python3 -c "
-import struct, zlib
-w,h=48,48
-raw=b''
-for y in range(h):
-    raw+=b'\x00'
-    for x in range(w):
-        raw+=b'\x00\x00\x00'
-cdata=zlib.compress(raw,9)
-ihdr=struct.pack('>IIBBBBB',w,h,8,2,0,0,0)
-def chunk(t,d):
-    c=t+d
-    return struct.pack('>I',len(d))+c+struct.pack('>I',zlib.crc32(c)&0xffffffff)
-png=b'\x89PNG\r\n\x1a\n'+chunk(b'IHDR',ihdr)+chunk(b'IDAT',cdata)+chunk(b'IEND',b'')
-open('app/src/main/res/mipmap-hdpi/ic_launcher.png','wb').write(png)
-print('icon ok')
-"
-
-          cat > app/build.gradle << 'GRADLE'
-plugins {
-    id 'com.android.application'
-}
-android {
-    namespace 'com.blackscreen.tv'
-    compileSdk 34
-    defaultConfig {
-        applicationId "com.blackscreen.tv"
-        minSdk 21
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-}
-GRADLE
-
-          cat > build.gradle << 'GRADLE'
-plugins {
-    id 'com.android.application' version '8.1.4' apply false
-}
-GRADLE
-
-          cat > settings.gradle << 'GRADLE'
-pluginManagement {
-    repositories { google(); mavenCentral(); gradlePluginPortal() }
-}
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories { google(); mavenCentral() }
-}
-rootProject.name = "BlackScreenTV"
-include ':app'
-GRADLE
-
-          mkdir -p gradle/wrapper
-          cat > gradle/wrapper/gradle-wrapper.properties << 'PROPS'
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-PROPS
-
-      - name: Setup Gradle
+      - name: Install Gradle 8.4 and generate wrapper
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.4-bin.zip -O /tmp/g.zip
           unzip -q /tmp/g.zip -d /tmp/gradle
-          /tmp/gradle/gradle-8.4/bin/gradle wrapper
+          /tmp/gradle/gradle-8.4/bin/gradle wrapper --gradle-version 8.4 --project-dir .
           chmod +x gradlew
+          echo "gradlew created: $(ls -la gradlew)"
 
-      - name: Build APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Verify project structure
+        run: |
+          echo "=== Root files ==="
+          ls -la
+          echo "=== app/build.gradle ==="
+          cat app/build.gradle
+          echo "=== settings.gradle ==="
+          cat settings.gradle
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon --info 2>&1 | tail -50
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: BlackScreen-TV
+          name: BlackScreen-AndroidTV
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
